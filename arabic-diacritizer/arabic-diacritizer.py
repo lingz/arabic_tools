@@ -8,7 +8,6 @@ import os
 import subprocess
 import re
 import itertools
-import pprint
 from arabic_diacritics import diacritics
 
 if sys.version_info <= (3,0):
@@ -64,7 +63,7 @@ def main():
         })
     # window in which we can search for solutions for the query
     word_index = 0
-    for match in re.finditer(r"Vocalized as : \t(.+?)\n(?:.|\n)+?prefix : (.+?)\n",
+    for match in re.finditer(r"Vocalized as : \t(.+?)(?:\(.*\))?\n(?:.|\n)+?prefix : (.+?)\n",
             output):
         match_pos = match.start(0)
         prefix = match.group(2)
@@ -80,7 +79,6 @@ def main():
         if is_subseq(matches[word_index]["word"], diacritization):
             matches[word_index]["diacritizations"].append(diacritization)
     
-    pprint.PrettyPrinter(indent=4).pprint(matches)
     if single_word_mode:
         for word in matches:
             num_diacritizations = len(word["diacritizations"])
@@ -93,22 +91,20 @@ def main():
                 print("%s\t%s" % (word["word"], word["word"]))
     else:
         words = list(map(lambda x: x.split() or [""], words))
-        pprint.PrettyPrinter(indent=4).pprint(words)
         match_index = 0
         n = 0
         for original_word in words:
             out = []
             num_to_print = len(original_word) or 1
             for i in range(num_to_print):
-                print("n = %d i = %d" % (n, match_index))
                 current = []
                 word = matches[match_index]
                 if (word["word"] != original_word[i]):
-                    print("GOT A PROBLEM")
-                    print("%s : %s" % (word["word"], original_word[i]))
+                    print("GOT A PROBLEM", file=sys.stderr)
+                    print("%s : %s" % (word["word"], original_word[i]), file=sys.stderr)
+                    exit(1)
                 num_diacritizations = len(word["diacritizations"])
                 if mode == "one2one" and num_diacritizations == 1:
-                    print("Adding " + word["diacritizations"][0] + " for " + " ".join(original_word))
                     current.append(word["diacritizations"][0])
                 elif mode == "one2many" and num_diacritizations > 0:
                     for diacritization in word["diacritizations"]:
@@ -122,12 +118,9 @@ def main():
                 print("%s\t%s" % (" ".join(original_word), " ".join(original_word)))
             else:
                 possible_outs = list(itertools.product(*out))
-                print(len(possible_outs))
                 for possible_out in possible_outs:
                     print("%s\t%s" % (" ".join(original_word), " ".join(possible_out)))
                 n += 1
-    print(len(words))
-    print(len(matches))
 
 
 

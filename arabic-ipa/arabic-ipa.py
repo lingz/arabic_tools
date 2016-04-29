@@ -67,6 +67,7 @@ def main():
                     output_line.append(mapped)
                 elif keep_unknown:
                     output_line.append(char)
+        print(output_line)
         output = seperator.join(output_line) + "\n"
         try:
             sys.stdout.write(output)
