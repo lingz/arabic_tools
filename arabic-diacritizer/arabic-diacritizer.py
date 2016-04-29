@@ -136,7 +136,7 @@ if __name__ == "__main__":
             description="Reads undiacritized/partially diacritized arabic " +
             "from STDIN and pipes undiacritized, diacritized tab seperated " +
             "to STDOUT. Note this won't print to STDOUT until EOF is reached.")
-    argparser.add_argument('-m', '--mode', type=str, default="one2many",
+    argparser.add_argument('-m', '--mode', type=str, default="one2one",
         help='[one2one | one2many] (default one2many). For one2one only a ' +
         'single certain match will cause diacritization. one2many will list' +
         'all diacritizations')

@@ -16,24 +16,33 @@ def main():
     seperator = args.seperator
     verbose = args.verbose
     whitespace = set(string.whitespace)
+    skipped = 0
     for line in sys.stdin:
         to_filter_on = ""
         if field == -1:
             to_filter_on = line
         else:
             to_filter_on = line.split(seperator)[field - 1]
+        if len(to_filter_on.strip()) < 1:
+            if verbose:
+                skipped += 1
+                print("Skipping line because it is empty", file=sys.stderr)
+            continue
         include = True
         for char in to_filter_on:
             if char == ".":
                 continue
             if char not in letters and char not in whitespace:
                 if verbose:
+                    skipped += 1
                     print("Skipping line %s because of char %s" %
                             (line.strip(), char), file=sys.stderr)
                 include = False
                 break
         if include:
             print(line, end="")
+    if verbose:
+        print("Num skipped: %d" % skipped, file=sys.stderr)
 
 if __name__ == "__main__":
     argparser = argparse.ArgumentParser(
