@@ -22,6 +22,7 @@ def main():
     args = argparser.parse_args()
     mode = args.mode
     single_word_mode = args.single
+    first_mode = args.first
     if mode not in ["one2one", "one2many"]:
         print("Invalid mode: can only accept one2one and one2many",
                 file=sys.stderr)
@@ -59,7 +60,7 @@ def main():
         matches.append({
             "word": match.group(1),
             "start": match.start(0),
-            "diacritizations": []
+            "diacritizations": set()
         })
     # window in which we can search for solutions for the query
     word_index = 0
@@ -77,13 +78,14 @@ def main():
             word_index += 1
         diacritization = match.group(1)
         if is_subseq(matches[word_index]["word"], diacritization):
-            matches[word_index]["diacritizations"].append(diacritization)
-    
+            matches[word_index]["diacritizations"].add(diacritization)
+
     if single_word_mode:
         for word in matches:
             num_diacritizations = len(word["diacritizations"])
-            if mode == "one2one" and num_diacritizations == 1:
-                print("%s\t%s" % (word["word"], word["diacritizations"][0]))
+            if mode == "one2one" and (num_diacritizations == 1 or \
+                    (first_mode and num_diacritizations > 1)):
+                print("%s\t%s" % (word["word"], list(word["diacritizations"])[0]))
             elif mode == "one2many" and num_diacritizations > 0:
                 for diacritization in word["diacritizations"]:
                     print("%s\t%s" % (word["word"], diacritization))
@@ -92,7 +94,6 @@ def main():
     else:
         words = list(map(lambda x: x.split() or [""], words))
         match_index = 0
-        n = 0
         for original_word in words:
             out = []
             num_to_print = len(original_word) or 1
@@ -104,8 +105,9 @@ def main():
                     print("%s : %s" % (word["word"], original_word[i]), file=sys.stderr)
                     exit(1)
                 num_diacritizations = len(word["diacritizations"])
-                if mode == "one2one" and num_diacritizations == 1:
-                    current.append(word["diacritizations"][0])
+                if mode == "one2one" and (num_diacritizations == 1 or \
+                        (first_mode and num_diacritizations > 1)):
+                    current.append(list(word["diacritizations"])[0])
                 elif mode == "one2many" and num_diacritizations > 0:
                     for diacritization in word["diacritizations"]:
                         current.append(diacritization)
@@ -120,8 +122,16 @@ def main():
                 possible_outs = list(itertools.product(*out))
                 for possible_out in possible_outs:
                     print("%s\t%s" % (" ".join(original_word), " ".join(possible_out)))
-                n += 1
-
+    
+    # Stats for one2one mode
+    if mode == "one2one":
+        single_word_matches = 0
+        for word in matches:
+            if len(word["diacritizations"]) == 1:
+                single_word_matches += 1
+        print("Single Matches: %d / %d (%f%%)" % (single_word_matches, len(matches),
+            single_word_matches / len(matches)),
+                file=sys.stderr)
 
 
 if __name__ == "__main__":
@@ -135,4 +145,6 @@ if __name__ == "__main__":
         'all diacritizations')
     argparser.add_argument('-s', '--single', action="store_true",
         help='Splits multi word phrases into single words')
+    argparser.add_argument('-f', '--first', action="store_true",
+        help='Always gives the first match (in one2one mode)')
     main()

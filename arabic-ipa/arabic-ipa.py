@@ -67,7 +67,6 @@ def main():
                     output_line.append(mapped)
                 elif keep_unknown:
                     output_line.append(char)
-        print(output_line)
         output = seperator.join(output_line) + "\n"
         try:
             sys.stdout.write(output)
@@ -84,7 +83,7 @@ def main():
 
 if __name__ == "__main__":
     argparser = argparse.ArgumentParser(description="Converts arabic strings into IPA phones naively.")
-    argparser.add_argument('-s', '--seperator', type=str, default="_",
+    argparser.add_argument('-s', '--seperator', type=str, default=" ",
         help='What char to seperate IPA symbols with (default: None)')
     argparser.add_argument('-k', "--keep-unknown", action="store_true",
         help='Keep unrecognized symbols that cannot be turned to IPA')
