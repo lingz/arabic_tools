@@ -1,0 +1,10 @@
+# Collection of Arabic Processing Utilities
+
+Includes:
+
+- Arabic Diacritizer (Tries to guess diacritization of word using dictionary)
+- Arabic to IPA Converter (Converts diacritized Arabic to International Phonetic Alphabet Unicode)
+- Arabic filter (Deletes non-arabic terms)
+
+They can all be run with `python [script_name]`. Mostly they read from STDIN and write to STDOUT
+but they can all be run with `--help` to see exact documentation.
